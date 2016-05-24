@@ -44,9 +44,12 @@ transferTexture = updateTransferFunction();
 
   var screenSize = new THREE.Vector2(window.innerWidth, window.innerHeight);
   var mainSceneSize = new THREE.Vector2(mainScene.innerWidth(), mainScene.innerHeight());
-  console.log("mainScene.innerWidth(): " + mainScene.innerWidth() + ", mainScene.innerHeight(): " +mainScene.innerHeight() );
+
+  /*console.log("mainScene.innerWidth(): " + mainScene.innerWidth() + ", mainScene.innerHeight(): " +mainScene.innerHeight() );
 console.log("window.innerWidth: " +window.innerWidth + ", window.innerHeight: " +window.innerHeight);
-console.log("container.innerWidth: " +container.innerWidth() + ", container.innerHeight: " +container.innerHeight());
+console.log("container.innerWidth: " +container.innerWidth() + ", container.innerHeight: " +container.innerHeight());*/
+
+
   //Texture to save worldSpaceCoords
   rtTexture = new THREE.WebGLRenderTarget(mainSceneSize.x, mainSceneSize.y, {
     minFilter: THREE.LinearFilter,
