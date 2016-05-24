@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Volume Renderer</title>
+    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<link rel="stylesheet" href="./style/style.css" media="screen" title="no title" charset="utf-8">
+	</head>
+  <body >
+
+    <div id="container">
+      <div>Transfer Function</div>
+      0.0<img id="transferFuncImg" style="align:right"/>1.0
+      <div id="mainScene"></div>
+    <div id="galleryContainer">
+      <div id="preview1" class="gallery">klsajfkljasklödfjklasjdfklajsklfjdlskaj</div>
+      <div id="preview2" class="gallery">klsajfkljasklödfjklasjdfklajsklfjdlskaj</div>
+      <div id="preview3" class="gallery">klsajfkljasklödfjklasjdfklajsklfjdlskaj</div>
+      <div id="preview4" class="gallery">klsajfkljasklödfjklasjdfklajsklfjdlskaj</div>
+      <div id="preview5" class="gallery">klsajfkljasklödfjklasjdfklajsklfjdlskaj</div>
+
+    </div>
+    </div>
+
+    <script src="./libs/three.min.js"></script>
+    <script src="./libs/jquery-1.8.3.js" ></script>
+    <script src="./libs/OrbitControls.js">
+
+    </script>
+    <script src="./libs/dat.gui.min.js" ></script>
+    <script src="./libs/Detector.js" ></script>
+    <script id="fragmentShaderFirstPass" type="x-shader/x-fragment">
+      varying vec3 worldSpaceCoords;
+
+      void main(){
+        gl_FragColor = vec4(worldSpaceCoords.x, worldSpaceCoords.y, worldSpaceCoords.z,1.0);
+      }
+    </script>
+    <script id="vertexShaderFirstPass" type="x-shader/x-vertex">
+      varying vec3 worldSpaceCoords;
+
+      void main(){
+        worldSpaceCoords = position + vec3(0.5, 0.5, 0.5);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
+    </script>
+    <script id="vertexShaderSecondPass" type="x-shader/x-vertex">
+      varying vec3 worldSpaceCoords;
+      varying vec4 projectedCoords;
+
+      void main(){
+        worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5, 0.5),1)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        projectedCoords = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    </script>
+    <script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
+      varying vec3 worldSpaceCoords;
+      varying vec4 projectedCoords;
+      uniform sampler2D tex, cubeTex, transferTex;
+      uniform float steps;
+      uniform float alphaCorrection;
+      uniform float lowThreshold1;
+      uniform float highThreshold1;
+      uniform bool applyTransferFunc;
+
+      const int MAX_STEPS = 887;
+
+      vec4 sampleAs3DTexture(vec3 texCoord){
+        vec4 colorSlice1, colorSlice2;
+        vec2 texCoordSlice1, texCoordSlice2;
+
+        float zSliceNumber1 = floor(texCoord.z*255.0);
+        float zSliceNumber2 = min(zSliceNumber1 + 1.0, 255.0);
+
+        texCoord.xy /= 16.0;
+
+        texCoordSlice1 = texCoordSlice2 = texCoord.xy;
+
+        texCoordSlice1.x += (mod(zSliceNumber1,16.0)/16.0);
+        texCoordSlice1.y += floor((255.0 - zSliceNumber1)/16.0)/16.0;
+
+        texCoordSlice2.x += (mod(zSliceNumber2,16.0)/16.0);
+        texCoordSlice2.y += floor((255.0 - zSliceNumber2)/16.0)/16.0;
+
+        colorSlice1 = texture2D(cubeTex, texCoordSlice1);
+        colorSlice2 = texture2D(cubeTex, texCoordSlice2);
+      float  intensity1 = 0.3*  colorSlice1.r + 0.59*  colorSlice1.g + 0.11*  colorSlice1.b;
+        float intensity2 = 0.3*colorSlice2.r + 0.59*colorSlice2.g + 0.11*colorSlice2.b;
+
+
+        //MAIL AN LAWONN, Wo am besten einhaken? nonlinear. datgui
+
+
+        if(applyTransferFunc){
+          colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice1.a, sqrt(intensity1))).rgb;
+          colorSlice2.rgb = texture2D(transferTex, vec2(colorSlice2.a, sqrt(intensity2))).rgb;
+        }
+
+        if(intensity1 < lowThreshold1 || intensity1 > highThreshold1){
+          colorSlice1.a = 0.0;
+        }else {
+          colorSlice1.a = 1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0));//pow(intensity1,2.0) * (1.0+colorSlice1.a);
+        }
+        if(intensity2 < lowThreshold1 || intensity2 > highThreshold1 ){
+          colorSlice2.a = 0.0;
+        }else {
+          colorSlice2.a = 1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0));//pow(intensity2,2.0) * (1.0+colorSlice2.a);
+
+        }
+
+      //  colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
+      //	colorSlice2.rgb = texture2D( transferTex, vec2( colorSlice2.a, 1.0) ).rgb;
+
+        float zDifference = mod(texCoord.z *255.0 ,1.0);
+
+        return mix(colorSlice1, colorSlice2, zDifference);
+
+
+      }
+
+      void main(){
+        //texture coordinates from [-1,1 ] to [0,1]
+        vec2 texc = vec2(((projectedCoords.x / projectedCoords.w)+1.0)/2.0, ((projectedCoords.y/projectedCoords.w)+1.0)/2.0);
+
+        //End ray at backface of the box, stored in the texture
+        vec3 backPosition = texture2D(tex, texc).xyz;
+
+        //start ray at world space position
+        vec3 frontPosition = worldSpaceCoords;
+
+        vec3 direction = backPosition - frontPosition;
+
+        float rayLength = length(direction);
+
+        float delta = 1.0/steps;
+
+        vec3 deltaDirection = normalize(direction) * delta;
+        float deltaDirectionLenght = length(deltaDirection);
+
+        //start ray
+        vec3 currentPosition = frontPosition;
+
+        vec4 accumulatedColor = vec4(0.0);
+
+        float accumulatedAlpha = 0.0;
+
+        float accumulatedLength = 0.0;
+
+        float alphaScaleFactor = 25.6 * delta;
+
+        vec4 colorSample;
+        float alphaSample;
+        float intensity;
+for (int i = 0; i < MAX_STEPS; i++) {
+        colorSample = sampleAs3DTexture(currentPosition);
+
+        alphaSample = colorSample.a * alphaCorrection;
+
+   alphaSample *= (1.0 - accumulatedAlpha);
+
+        alphaSample *= alphaScaleFactor;
+
+
+        accumulatedColor += colorSample * alphaSample;
+
+
+
+
+        accumulatedAlpha += alphaSample;
+
+
+        currentPosition += deltaDirection;
+        accumulatedLength += deltaDirectionLenght;
+
+
+
+        if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
+          break;}
+
+}
+
+
+        gl_FragColor = accumulatedColor;
+
+
+
+      }
+
+    </script>
+
+
+    <script src="./js/main.js"> </script>
+  </body>
+</html>
