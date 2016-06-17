@@ -2,10 +2,19 @@ if(!Detector.webgl){
   Detector.addGetWebGLMessage();
 }
 
-var container, camera, sceneFirstPass, renderer, mainScene, preview1;
+var container, camera, sceneFirstPass, renderer, mainScene;
 var rtTexture, transferTexture;
 var cubeTexture;
 var guiControls;
+var screenshot = false;
+  var snapshotURL;
+var image = new Image();
+var  image2 = new Image();
+var  image3 = new Image();
+var  image4 = new Image();
+var image5 = new Image();
+
+
 
 var materialSecond;
 init();
@@ -18,9 +27,58 @@ function init(){
     this.steps = 256.0;
     this.alphaCorrection = 1.0;
     this.color1 = "#00FA58";
-    this.lowThreshold1 = 0.2;
-    this.highThreshold1 = 0.6;
+    this.color2 = "#eb079d";
+    this.color3 = "#fafea6";
+    this.color4 = "#3466fe";
+    this.color5 = "#75f4d6";
+    this.lowThreshold1 = 0.0;
+    this.highThreshold1 = 1.0;
+
     this.applyTransferFunc = false;
+    this.range = (this.highThreshold1 - this.lowThreshold1);
+    this.takeSnapshot = function(){
+      screenshot = true;
+      this.range = (this.highThreshold1 - this.lowThreshold1);
+
+      updateTransferFunction();
+      updateTransferFuncTex();
+
+
+     materialSecond.uniforms.lowThreshold1.value =   this.lowThreshold1;
+      materialSecond.uniforms.highThreshold1.value = this.lowThreshold1 + this.range/5.0;
+      renderer.render(sceneSecondPass, camera);
+      image.src = renderer.domElement.toDataURL("image/png");
+      $('#preview1').html(image);
+
+      materialSecond.uniforms.lowThreshold1.value = materialSecond.uniforms.highThreshold1.value;
+      materialSecond.uniforms.highThreshold1.value = this.lowThreshold1 + 2.0*this.range/5.0;
+      renderer.render(sceneSecondPass, camera);
+      image2.src = renderer.domElement.toDataURL("image/png");
+      $('#preview2').html(image2);
+
+      materialSecond.uniforms.lowThreshold1.value = materialSecond.uniforms.highThreshold1.value;
+      materialSecond.uniforms.highThreshold1.value =this.lowThreshold1 + 3.0*this.range/5.0;
+      renderer.render(sceneSecondPass, camera);
+      image3.src = renderer.domElement.toDataURL("image/png");
+      $('#preview3').html(image3);
+
+      materialSecond.uniforms.lowThreshold1.value = materialSecond.uniforms.highThreshold1.value;
+      materialSecond.uniforms.highThreshold1.value = this.lowThreshold1 + 4.0*this.range/5.0;
+      renderer.render(sceneSecondPass, camera);
+      image4.src = renderer.domElement.toDataURL("image/png");
+      $('#preview4').html(image4);
+
+      materialSecond.uniforms.lowThreshold1.value = materialSecond.uniforms.highThreshold1.value;
+      materialSecond.uniforms.highThreshold1.value = this.highThreshold1;
+      renderer.render(sceneSecondPass, camera);
+     image5.src = renderer.domElement.toDataURL("image/png");
+      $('#preview5').html(image5);
+
+
+
+
+
+    };
   };
 
   //container =  document.getElementById('container');
@@ -40,7 +98,7 @@ cubeTexture.generateMipmaps = false;
 cubeTexture.minFilter = THREE.LinearFilter;
 cubeTexture.magFilter = THREE.LinearFilter;
 
-transferTexture = updateTransferFunction();
+
 
   var screenSize = new THREE.Vector2(window.innerWidth, window.innerHeight);
   var mainSceneSize = new THREE.Vector2(mainScene.innerWidth(), mainScene.innerHeight());
@@ -83,7 +141,7 @@ console.log("container.innerWidth: " +container.innerWidth() + ", container.inne
       applyTransferFunc: {type: 'bool', value: guiControls.applyTransferFunc}
     }
   });
-
+transferTexture = updateTransferFunction();
   sceneFirstPass = new THREE.Scene();
   sceneSecondPass = new THREE.Scene();
 
@@ -110,7 +168,7 @@ var destCtx = destinationCanvas.getContext('2d');
 //call its drawImage() function passing it the source canvas directly
 destCtx.drawImage(renderer.domElement, 0, 0);
 
-  preview1.append(destinationCanvas);
+
 
 
 
@@ -121,14 +179,25 @@ destCtx.drawImage(renderer.domElement, 0, 0);
  gui.add(guiControls, 'steps', 0.0, 512.0);
   gui.add(guiControls, 'alphaCorrection', 0.0, 5.0).step(0.01);
   gui.add(guiControls, 'applyTransferFunc');
+  gui.add(guiControls, 'takeSnapshot');
   var folder = gui.addFolder('Transfer Function');
   var controllerColor1 = folder.addColor(guiControls, "color1");
+  var controllerColor2 = folder.addColor(guiControls, "color2");
+  var controllerColor3 = folder.addColor(guiControls, "color3");
+  var controllerColor4 = folder.addColor(guiControls, "color4");
+  var controllerColor5 = folder.addColor(guiControls, "color5");
+
   var controllerLowThreshold1 = folder.add(guiControls, "lowThreshold1", 0.0, 1.0);
   var controlerHighThreshold1 = folder.add(guiControls, "highThreshold1", 0.0, 1.0);
   controllerColor1.onChange(updateTransferFuncTex);
+  controllerColor2.onChange(updateTransferFuncTex);
+  controllerColor3.onChange(updateTransferFuncTex);
+  controllerColor4.onChange(updateTransferFuncTex);
+  controllerColor5.onChange(updateTransferFuncTex);
+
   controllerLowThreshold1.onChange(updateTransferFuncTex);
   controlerHighThreshold1.onChange(updateTransferFuncTex);
-
+updateTransferFuncTex();
   onResize();
  window.addEventListener('resize', onResize, false);
 }
@@ -139,7 +208,7 @@ var canvas = document.createElement('canvas');
 				canvas.width = 256;
 				var ctx = canvas.getContext('2d');
 				var grd = ctx.createLinearGradient(0, 0, canvas.width -1 , canvas.height - 1);
-			if(guiControls.lowThreshold1 <= 0.05){
+		/*	if(guiControls.lowThreshold1 <= 0.05){
         grd.addColorStop(0.0, "#000000" );
       }else {
         grd.addColorStop(guiControls.lowThreshold1 - 0.05, "#000000" );
@@ -150,7 +219,20 @@ var canvas = document.createElement('canvas');
           grd.addColorStop(1.0, "#000000" );
         }else {
           grd.addColorStop(guiControls.highThreshold1 + 0.05, "#000000" );
-        }
+        }*/
+        grd.addColorStop( guiControls.lowThreshold1, guiControls.color1);
+        grd.addColorStop(guiControls.range/5.0, guiControls.color1);
+        grd.addColorStop(guiControls.range/5.0, guiControls.color2);
+        grd.addColorStop(2.0*guiControls.range/5.0, guiControls.color2);
+        grd.addColorStop(2.0*guiControls.range/5.0, guiControls.color3);
+        grd.addColorStop(3.0*guiControls.range/5.0, guiControls.color3);
+        grd.addColorStop(3.0*guiControls.range/5.0, guiControls.color4);
+        grd.addColorStop(4.0*guiControls.range/5.0, guiControls.color4);
+        grd.addColorStop(4.0*guiControls.range/5.0, guiControls.color5);
+        grd.addColorStop( guiControls.highThreshold1, guiControls.color5);
+
+
+
 				ctx.fillStyle = grd;
 				ctx.fillRect(0,0,canvas.width -1 ,canvas.height -1 );
 
@@ -172,6 +254,47 @@ function updateTransferFuncTex(value) {
   materialSecond.uniforms.highThreshold1.value =guiControls.highThreshold1;
 }
 
+$("#preview1").click(function(){
+
+
+  materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1;
+  materialSecond.uniforms.highThreshold1.value = guiControls.lowThreshold1 + guiControls.range/5.0;
+
+
+});
+
+$("#preview2").click(function(){
+
+  materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1 + guiControls.range/5.0;
+  materialSecond.uniforms.highThreshold1.value = guiControls.lowThreshold1 + 2.0*guiControls.range/5.0;
+
+
+
+
+});
+
+$("#preview3").click(function(){
+  materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1 + 2.0*guiControls.range/5.0;
+  materialSecond.uniforms.highThreshold1.value = guiControls.lowThreshold1 + 3.0*guiControls.range/5.0;
+
+
+
+});
+
+$("#preview4").click(function(){
+  materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1 + 3.0*guiControls.range/5.0;
+  materialSecond.uniforms.highThreshold1.value = guiControls.lowThreshold1 + 4.0*guiControls.range/5.0;
+
+
+});
+
+$("#preview5").click(function(){
+  materialSecond.uniforms.lowThreshold1.value =guiControls.lowThreshold1 + 4.0*guiControls.range/5.0;
+  materialSecond.uniforms.highThreshold1.value =guiControls.lowThreshold1 +  guiControls.range;
+
+
+});
+
 function onResize(event) {
  camera.aspect = $(renderer.domElement).parent().innerWidth() / $(renderer.domElement).parent().innerHeight();
 // camera.aspect = mainScene.innerWidth() / mainScene.innerHeight();
@@ -184,6 +307,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   render();
+
 }
 
 function render() {
@@ -192,10 +316,21 @@ function render() {
   renderer.render(sceneFirstPass, camera, rtTexture);
 
   renderer.render(sceneSecondPass, camera);
+  if(screenshot){
+//  snapshotURL = renderer.domElement.toDataURL("image/png");
+  // image.src = snapshotURL;
+   //renderer.render(sceneSecondPass, camera);
+  // image2.src =  renderer.domElement.toDataURL("image/png");
+
+
+   materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1;
+  materialSecond.uniforms.highThreshold1.value =guiControls.highThreshold1;
+   screenshot = false;
+
+}
 
 
   materialSecond.uniforms.steps.value = guiControls.steps;
   materialSecond.uniforms.alphaCorrection.value = guiControls.alphaCorrection;
   materialSecond.uniforms.applyTransferFunc.value = guiControls.applyTransferFunc;
-
 }
