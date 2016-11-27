@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Volume Renderer</title>
+    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+	<link rel="stylesheet" href="./style/style.css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="./style/jquery-ui.min.css" media="screen" title="no title" charset="utf-8">
+
+	</head>
+  <body >
+    <script src="./libs/three.min.js"></script>
+    <script src="./libs/jquery-1.8.3.js" ></script>
+    <script src="./libs/OrbitControls.js"></script>
+    <script src="./libs/dat.gui.min.js" ></script>
+    <script src="./libs/Detector.js" ></script>
+    <script src="./libs/jquery-ui.min.js"></script>
+    <script src="./libs/jscolor.min.js"></script>
+    <script src="./libs/highcharts.js"></script>
+    <script src="./libs/draggable-points.js" ></script>
+    <script src="./libs/stats.min.js" ></script>
+
+    <div id="intro">
+
+      <div id="instruction">
+        Use the mouse to rotate and the mouswheel to zoom. <br><br>
+        Click on a preview image to discover the part. <br><br>
+        Click <b>Volume Zoom</b> to create a dynamic preview gallery of the current part. <br><br>
+        Click <b>Update Preview</b> to update the preview with the current camera (Work in Progress)
+
+      </div>
+      <a href="#" id="introStart">START</a>
+    </div>
+    <div id="container" >
+
+<ul style="float: left; list-style-type: none; position: absolute">
+
+
+    <li>
+        <input name="color1"
+        id="colorValue1"
+        value="00fa58"
+        type="hidden"
+        onchange="guiControls.color1 = '#'+this.value; updateTransferFuncTex(); updateTransferGraphic(); guiControls.update();  initChart(); ">
+        <button id="colorBtn1" class="jscolor {valueElement: 'colorValue1'}"   style="width: 20px; height: 20px;"></button>
+    </li>
+    <br>
+    <li>
+        <input name="color2"
+        id="colorValue2"
+        value="eb079d"
+        type="hidden"
+        onchange="guiControls.color2 = '#'+this.value; updateTransferFuncTex(); guiControls.update();updateTransferGraphic(); initChart();" >
+        <button id="colorBtn2" class="jscolor {valueElement: 'colorValue2'}"   style="width: 20px; height: 20px"></button>
+    </li>
+    <br>
+
+    <li>
+      <input name="color3"
+      id="colorValue3"
+      value="fafea6"
+      type="hidden"
+      onchange="guiControls.color3 = '#'+this.value; updateTransferFuncTex(); guiControls.update();updateTransferGraphic(); initChart();">
+      <button id="colorBtn3" class="jscolor {valueElement: 'colorValue3'}"   style="width: 20px; height: 20px"></button>
+    </li>
+    <br>
+
+    <li>
+      <input name="color4"
+      id="colorValue4"
+      value="3466fe"
+      type="hidden"
+      onchange="guiControls.color4 = '#'+this.value; updateTransferFuncTex(); guiControls.update();updateTransferGraphic(); initChart();">
+      <button id="colorBtn4" class="jscolor {valueElement: 'colorValue4'}"   style="width: 20px; height: 20px"></button>
+    </li>
+    <br>
+
+    <li>
+      <input name="color5"
+      id="colorValue5"
+      value="75f4d6"
+      type="hidden"
+      onchange="guiControls.color5 = '#'+this.value; updateTransferFuncTex(); guiControls.update();updateTransferGraphic(); initChart();">
+      <button id="colorBtn5" class="jscolor {valueElement: 'colorValue5'}"   style="width: 20px; height: 20px"></button>
+    </li>
+</ul>
+      <div id="mainScene">
+        </div>
+       <div id="rangeSlider">
+
+        </div>
+        <div style="position: absolute; width: 100%; bottom: 29%">
+
+        <img id="transferFuncImg" style=" position: relative; width: 100%; "/>
+        </div>
+        <div id="tfContainer" >
+
+        </div>
+     <div id="galleryContainer">
+
+      <div id="preview1" class="gallery">
+        <p style="float: left; left:6%; bottom: 2%; position: absolute; z-index: 100;">
+        <label for="opacity1">Opacity Adjustment:</label>
+        <input type="text" id="opacity1" readonly style="border:0; color:#ffffff; font-weight:bold; outline: none; background-color: rgba(0,0,0,0)">
+        </p>
+        <div class="opacitySlider" id="opacitySlider1" style="float: left;width: 150px; left: 10%; bottom: 2%; position: absolute; z-index: 100; margin-left: -75px">
+        </div>
+         <div class="previewImg">  </div>
+       </div>
+
+      <div id="preview2" class="gallery">
+        <p style="float: left; left:26%; bottom: 2%; position: absolute; z-index: 100;">
+        <label for="opacity1">Opacity Adjustment:</label>
+        <input type="text" id="opacity2" readonly style="border:0; color:#ffffff; font-weight:bold; outline: none; background-color: rgba(0,0,0,0)">
+        </p>
+        <div class="opacitySlider" id="opacitySlider2" style="float: left;width: 150px; left: 30%; bottom: 2%; position: absolute; z-index: 100; margin-left: -75px">
+        </div>
+        <div class="previewImg"></div>
+      </div>
+
+      <div id="preview3" class="gallery">
+        <p style="float: left; left:46%; bottom: 2%; position: absolute; z-index: 100;">
+        <label for="opacity3">Opacity Adjustment:</label>
+        <input type="text" id="opacity3" readonly style="border:0; color:#ffffff; font-weight:bold; outline: none; background-color: rgba(0,0,0,0);">
+        </p>
+        <div class="opacitySlider" id="opacitySlider3" style="float: left;width: 150px; left: 50%; bottom: 2%; position: absolute; z-index: 100; margin-left: -75px">
+        </div>
+        <div class="previewImg"></div><b>Click 'Zoom' to access the gallery.<br>'Update Preview' is WIP</b>
+      </div>
+
+      <div id="preview4" class="gallery">
+        <p style="float: left; left:66%; bottom: 2%; position: absolute; z-index: 100;">
+        <label for="opacity4">Opacity Adjustment:</label>
+        <input type="text" id="opacity4" readonly style="border:0; color:#ffffff; font-weight:bold; outline: none; background-color: rgba(0,0,0,0)">
+        </p>
+        <div class="opacitySlider" id="opacitySlider4" style="float: left;width: 150px; left: 70%; bottom: 2%; position: absolute; z-index: 100; margin-left: -75px">
+        </div>
+        <div class="previewImg"></div>
+      </div>
+
+      <div id="preview5" class="gallery">
+        <p style="float: left; left:86%; bottom: 2%; position: absolute; z-index: 100;">
+        <label for="opacity5">Opacity Adjustment:</label>
+        <input type="text" id="opacity5" readonly style="border:0; color:#ffffff; font-weight:bold; outline: none; background-color: rgba(0,0,0,0); width: 10px;">
+        </p>
+        <div class="opacitySlider" id="opacitySlider5" style="float: left;width: 150px; left: 90%; bottom: 2%; position: absolute; z-index: 100; margin-left: -75px">
+        </div>
+        <div class="previewImg"></div>
+      </div>
+
+
+    </div>
+    </div>
+
+
+
+    <!--Fragment Shader First Pass -->
+    <script id="fragmentShaderFirstPass" type="x-shader/x-fragment">
+      varying vec3 worldSpaceCoords;
+
+      void main(){
+        gl_FragColor = vec4(worldSpaceCoords.x, worldSpaceCoords.y, worldSpaceCoords.z,1.0);
+      }
+    </script>
+
+      <!--Vertex Shader First Pass -->
+    <script id="vertexShaderFirstPass" type="x-shader/x-vertex">
+      varying vec3 worldSpaceCoords;
+
+      void main(){
+        worldSpaceCoords = position + vec3(0.5, 0.5, 0.5);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      }
+    </script>
+
+      <!--Vertex Shader Second Pass -->
+    <script id="vertexShaderSecondPass" type="x-shader/x-vertex">
+      varying vec3 worldSpaceCoords;
+      varying vec4 projectedCoords;
+
+      void main(){
+        worldSpaceCoords = (modelMatrix * vec4(position + vec3(0.5, 0.5, 0.5),1)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        projectedCoords = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    </script>
+
+      <!--Fragment Shader Second Pass -->
+    <script id="fragmentShaderSecondPass" type="x-shader/x-fragment">
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+precision highp sampler2D;
+      varying vec3 worldSpaceCoords;
+      varying vec4 projectedCoords;
+      uniform sampler2D tex, cubeTex, transferTex;
+      uniform float steps;
+      uniform float alphaCorrection;
+      uniform float alphaAdjustmentFactor1;
+      uniform float alphaAdjustmentFactor2;
+      uniform float alphaAdjustmentFactor3;
+      uniform float alphaAdjustmentFactor4;
+      uniform float alphaAdjustmentFactor5;
+      uniform float lowThreshold1;
+      uniform float highThreshold1;
+      uniform float range;
+      uniform float rangeMin;
+      uniform float rangeMax;
+      uniform bool applyTransferFunc;
+      uniform bool transferChartShow;
+
+      float testlength1 = (1.0 - pow(0.8, (1.0/5.0)));
+      float testfactor1 = 1.0/(1.0 - pow(0.8, (1.0/5.0)));
+
+      float testlength2 =  1.0- pow(0.6, (1.0/5.0)) - (1.0 - pow(0.8, (1.0/5.0)));
+      float testfactor2 = 1.0/ 1.0- pow(0.6, (1.0/5.0)) - (1.0 - pow(0.8, (1.0/5.0)));
+      float testlow2 = (1.0 - pow(0.8, (1.0/5.0)));
+
+      float testlow3 = 1.0 - pow(0.6, (1.0/5.0));
+      float testlenght3 = 1.0-pow(0.4, (1.0/5.0)) - 1.0- pow(0.6, (1.0/5.0));
+      float testfactor3 = 1.0/1.0-pow(0.4, (1.0/5.0)) - 1.0- pow(0.6, (1.0/5.0));
+
+      float testlow4 = 1.0-pow(0.4, (1.0/5.0));
+      float testlenght4 = 1.0-pow(0.2, (1.0/5.0)) -1.0-pow(0.4, (1.0/5.0));
+      float testfactor4 = 1.0/1.0-pow(0.2, (1.0/5.0)) -1.0-pow(0.4, (1.0/5.0));
+
+      float testlow5 = 1.0 - pow(0.2, (1.0/5.0));
+      float testlength5 = 1.0 - (1.0 - pow(0.2, (1.0/5.0)));
+      float testfactor5 = 1.0/ (1.0 - (1.0-pow(0.2, (1.0/5.0))));
+
+
+
+
+
+
+      const int MAX_STEPS = 1030;
+
+
+      vec4 sampleAs3DTexture(vec3 texCoord){
+        vec4 colorSlice1, colorSlice2;
+        vec2 texCoordSlice1, texCoordSlice2;
+
+        float zSliceNumber1 = floor(texCoord.z*255.0);
+        float zSliceNumber2 = min(zSliceNumber1 + 1.0, 255.0);
+        float slice1;
+        float slice2;
+
+        texCoord.xy /= 16.0;
+
+        texCoordSlice1 = texCoordSlice2 = texCoord.xy;
+
+        texCoordSlice1.x += (mod(zSliceNumber1,16.0)/16.0);
+        texCoordSlice1.y += floor((255.0 - zSliceNumber1)/16.0)/16.0;
+
+        texCoordSlice2.x += (mod(zSliceNumber2,16.0)/16.0);
+        texCoordSlice2.y += floor((255.0 - zSliceNumber2)/16.0)/16.0;
+
+        colorSlice1 = texture2D(cubeTex, texCoordSlice1);
+        colorSlice2 = texture2D(cubeTex, texCoordSlice2);
+
+
+        // if(applyTransferFunc){
+        //    colorSlice1.rgb = texture2D(transferTex, vec2(0.1+0.9*(colorSlice1.a - lowThreshold1)/(highThreshold1 - lowThreshold1), sqrt(intensity1))).rgb;
+        //    colorSlice2.rgb = texture2D(transferTex, vec2(0.1+0.9*(colorSlice2.a - lowThreshold1)/(highThreshold1 - lowThreshold1), sqrt(intensity2))).rgb;
+        //  }
+
+//
+//          if(applyTransferFunc){
+//             colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
+//             colorSlice2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
+//           }
+//
+// if(transferChartShow){
+//   if(colorSlice1.a < lowThreshold1 || colorSlice1.a > highThreshold1){
+//     colorSlice1.a = 0.0;
+//   }else if(colorSlice1.a <   0.2){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)) )*alphaAdjustmentFactor1  ;
+//   }else if(colorSlice1.a <  0.4){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow2)*alphaAdjustmentFactor2;
+//   }else if(colorSlice1.a < 0.6){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow3)*alphaAdjustmentFactor3 ;
+//   }else if(colorSlice1.a < 0.8){
+//       colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow4)*alphaAdjustmentFactor4 ;
+//   }else{
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow5)*alphaAdjustmentFactor5 ;
+//   }
+//
+//   if(colorSlice2.a< lowThreshold1 || colorSlice2.a > highThreshold1 ){
+//     colorSlice2.a = 0.0;
+//   }else if(colorSlice2.a <  0.2){
+//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
+//   }else if(colorSlice2.a <  0.4){
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow2)*alphaAdjustmentFactor2 ;
+//   }else if(colorSlice2.a <  0.6){
+//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0))- testlow3)*alphaAdjustmentFactor3 ;
+//   }else if(colorSlice2.a < 0.8){
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow4)*alphaAdjustmentFactor4 ;
+//   }else {
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow5)*alphaAdjustmentFactor5 ;
+//   }
+// }else {
+//   if(colorSlice1.a < lowThreshold1 || colorSlice1.a > highThreshold1){
+//     colorSlice1.a = 0.0;
+//   }else if(colorSlice1.a <   rangeMin+range){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
+//   }else if(colorSlice1.a <  rangeMin+2.0*range){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor2 ;
+//   }else if(colorSlice1.a <  rangeMin+3.0*range){
+//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor3 ;
+//   }else if(colorSlice1.a < rangeMin+ 4.0*range){
+//       colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor4 ;
+//   }else{
+//     colorSlice1.a = (1.0 - pow((1.0 -colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor5 ;
+//   }
+//
+//   if(colorSlice2.a < lowThreshold1 || colorSlice2.a > highThreshold1 ){
+//     colorSlice2.a = 0.0;
+//   }else if(colorSlice2.a <  rangeMin+range){
+//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
+//   }else if(colorSlice2.a <  rangeMin+2.0*range){
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor2 ;
+//   }else if(colorSlice2.a <  rangeMin+3.0*range){
+//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor3 ;
+//   }else if(colorSlice2.a < rangeMin+ 4.0*range){
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor4 ;
+//   }else {
+//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a ), (1.0/5.0)))*alphaAdjustmentFactor5;
+//   }
+// }
+
+
+        float zDifference = mod(texCoord.z *255.0 ,1.0);
+        return mix(colorSlice1, colorSlice2, zDifference);
+
+
+      }
+      vec4 transferFunction(vec4 intensity){
+        vec4 intensityNew;
+
+        if(applyTransferFunc){
+           intensityNew.rgb = texture2D(transferTex, vec2(intensity.a, 1.0)).rgb;
+
+         }else {
+           intensityNew.rgb = intensity.rgb;
+         }
+        if(intensity.a < lowThreshold1 || intensity.a > highThreshold1){
+          intensityNew.a = 0.0;
+        }
+        else if(intensity.a <  rangeMin+(range)){
+         intensityNew.a = (1.0 - pow((1.0 - intensity.a), (1.0/5.0)))*alphaAdjustmentFactor1;
+       }
+       else if(intensity.a <  rangeMin+(2.0*range)){
+           intensityNew.a = (1.0 - pow((1.0 - intensity.a), (1.0/5.0))) *alphaAdjustmentFactor2;
+       }else if(intensity.a <  rangeMin+3.0*range){
+          intensityNew.a = (1.0 - pow((1.0 - intensity.a), (1.0/5.0))) *alphaAdjustmentFactor3;
+        }else if(intensity.a < rangeMin+range*4.0){
+            intensityNew.a = (1.0 - pow((1.0 - intensity.a), (1.0/5.0))) *alphaAdjustmentFactor4;
+        }else{
+          intensityNew.a = (1.0 - pow((1.0 -intensity.a), (1.0/5.0))) *alphaAdjustmentFactor5;
+        }
+        return intensityNew;
+      }
+
+      void main(){
+        //texture coordinates from [-1,1 ] to [0,1]
+        vec2 texc = vec2(((projectedCoords.x / projectedCoords.w)+1.0)/2.0, ((projectedCoords.y/projectedCoords.w)+1.0)/2.0);
+
+        //End ray at backface of the box, stored in the texture
+        vec3 backPosition = texture2D(tex, texc).xyz;
+
+        //start ray at world space position
+        vec3 frontPosition = worldSpaceCoords;
+
+        vec3 direction = backPosition - frontPosition;
+
+        float rayLength = length(direction);
+
+        float delta = 1.0/steps;
+
+        vec3 deltaDirection = normalize(direction) * delta;
+        float deltaDirectionLenght = length(deltaDirection);
+
+        //start ray
+        vec3 currentPosition = frontPosition;
+
+        vec4 accumulatedColor = vec4(0.0);
+
+        float accumulatedAlpha = 0.0;
+
+        float accumulatedLength = 0.0;
+
+float alphaScaleFactor = 51.2* (delta*4.0);
+
+        vec4 colorSample;
+        vec4 colorSampleNew;
+        float alphaSample;
+
+for (int i = 0; i < MAX_STEPS; i++) {
+
+      colorSample = sampleAs3DTexture(currentPosition);
+
+//new version
+
+       colorSampleNew = transferFunction(colorSample);
+
+        alphaSample = colorSampleNew.a * alphaCorrection;
+        alphaSample *= alphaScaleFactor;
+        accumulatedColor += (1.0-accumulatedAlpha) * colorSampleNew* alphaSample;
+ accumulatedAlpha += (1.0- accumulatedAlpha) * alphaSample;
+
+       //old version
+
+        //  alphaSample = colorSample.a * alphaCorrection;
+        // accumulatedColor += (1.0-accumulatedAlpha) * colorSample* alphaSample;
+        //  accumulatedAlpha += (1.0- accumulatedAlpha) * alphaSample;
+
+  //  alphaSample *= (1.0 - accumulatedAlpha);
+   //
+  //       alphaSample *= alphaScaleFactor;
+
+
+
+
+
+
+
+
+        currentPosition += deltaDirection;
+        accumulatedLength += deltaDirectionLenght;
+
+
+
+        if(accumulatedLength >= rayLength || accumulatedAlpha >= 1.0 ){
+          break;}
+
+}
+
+
+        gl_FragColor = accumulatedColor;
+
+
+
+      }
+
+    </script>
+
+
+
+    <script src="./js/main.js"> </script>
+      <script src="./js/transferChart.js"></script>
+
+  </body>
+</html>
