@@ -263,13 +263,10 @@ folder2.open();
       };
 
       this.reset = function(){
-      //   camera = new THREE.PerspectiveCamera(40, mainScene.innerWidth() /
-      // mainScene.innerHeight(), 0.01, 3000.0);
-      //   camera.position.z = 2.0;
+     
 
         controls.reset();
-        // controls = new THREE.OrbitControls( camera, renderer.domElement );
-        // controls.target.set(0.0,0.0,0.0);
+        
 
         guiControls.steps = 512.0;
         guiControls.alphaCorrection = 1.0;
@@ -423,10 +420,7 @@ cubeTexture.magFilter = THREE.LinearFilter;
   var screenSize = new THREE.Vector2(window.innerWidth, window.innerHeight);
   var mainSceneSize = new THREE.Vector2(mainScene.innerWidth(), mainScene.innerHeight());
 
-  /*console.log("mainScene.innerWidth(): " + mainScene.innerWidth() + ", mainScene.innerHeight(): " +mainScene.innerHeight() );
-console.log("window.innerWidth: " +window.innerWidth + ", window.innerHeight: " +window.innerHeight);
-console.log("container.innerWidth: " +container.innerWidth() + ", container.innerHeight: " +container.innerHeight());*/
-
+ 
 
   //Texture to save worldSpaceCoords
   rtTexture = new THREE.WebGLRenderTarget(mainSceneSize.x, mainSceneSize.y, {
@@ -497,17 +491,6 @@ transferTexture = updateTransferFunction();
   controls = new THREE.OrbitControls( camera, renderer.domElement );
   controls.target.set(0.0,0.0,0.0);
 
-//   var destinationCanvas    = document.createElement('canvas');
-// destinationCanvas.width  = preview1.innerWidth();
-// destinationCanvas.height = preview1.innerHeight();
-//
-// //grab the context from your destination canvas
-// var destCtx = destinationCanvas.getContext('2d');
-//
-// //call its drawImage() function passing it the source canvas directly
-// destCtx.drawImage(renderer.domElement, 0, 0);
-//
-//
 
 
 
@@ -520,10 +503,8 @@ transferTexture = updateTransferFunction();
  gui.add(guiControls, 'steps', 0.0, 1024.0).name('Steps').listen();
   gui.add(guiControls, 'alphaCorrection', 0.0, 2.0).step(0.01).name('Alpha Correction').listen();
   gui.add(guiControls, 'applyTransferFunc').name('Apply Color');
-//  gui.add(guiControls, 'preview').name('(Update Preview)');
   gui.add(guiControls, 'zoom').name('Volume Zoom');
   gui.add(guiControls, 'reset').name('Reset to start');
-  //gui.add(guiControls, 'intro').name('Show instruction');
   gui.add(guiControls, 'showTf').name('Show TF-Graph');
 
   var folder2 = gui.addFolder('Change Colorsteps');
@@ -592,10 +573,6 @@ function updateTransferFunction(){
 
 
 
-        // var img = document.getElementById('transferFuncImg');
-        // img.style.width = "256 px";
-        // img.style.height = "20 px";
-        // img.src = canvas.toDataURL();
 
 
 				transferTexture =  new THREE.Texture(canvas);
@@ -616,7 +593,6 @@ function updateTransferGraphic(){
 
 
 
-        // var dist = (rangeMax - rangeMinOld) - (sliderMin - rangeMinOld);
         var newPos1 =
           (
             ((oldMaximum - oldMinimun)/(rangeMax - rangeMin)) * (guiControls.graphicPos1 - sliderMin)
@@ -864,9 +840,7 @@ $('#opacity5').val(opacitySlider5.slider('value'));
 
 function onResize(event) {
  camera.aspect = $(renderer.domElement).parent().innerWidth() / $(renderer.domElement).parent().innerHeight();
-// camera.aspect = mainScene.innerWidth() / mainScene.innerHeight();
   camera.updateProjectionMatrix();
-//renderer.setSize(mainScene.innerWidth(), mainScene.innerHeight());
  renderer.setSize($(renderer.domElement).parent().innerWidth(), $(renderer.domElement).parent().innerHeight());
 }
 
@@ -879,15 +853,11 @@ function animate() {
 
 function render() {
 
-  //First renderpass, stores worldSpaceCoords of backsides into texture
   renderer.render(sceneFirstPass, camera,rtTexture);
 
   renderer.render(sceneSecondPass, camera);
   if(screenshot){
-//  snapshotURL = renderer.domElement.toDataURL("image/png");
-  // image.src = snapshotURL;
-   //renderer.render(sceneSecondPass, camera);
-  // image2.src =  renderer.domElement.toDataURL("image/png");
+
 
 
    materialSecond.uniforms.lowThreshold1.value = guiControls.lowThreshold1;

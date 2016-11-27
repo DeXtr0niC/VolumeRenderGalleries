@@ -22,18 +22,7 @@
     <script src="./libs/draggable-points.js" ></script>
     <script src="./libs/stats.min.js" ></script>
 
-    <div id="intro">
-
-      <div id="instruction">
-        Use the mouse to rotate and the mouswheel to zoom. <br><br>
-        Click on a preview image to discover the part. <br><br>
-        Click <b>Volume Zoom</b> to create a dynamic preview gallery of the current part. <br><br>
-        Click <b>Update Preview</b> to update the preview with the current camera (Work in Progress)
-
-      </div>
-      <a href="#" id="introStart">START</a>
-    </div>
-    <div id="container" >
+  
 
 <ul style="float: left; list-style-type: none; position: absolute">
 
@@ -263,75 +252,7 @@ precision highp sampler2D;
         colorSlice2 = texture2D(cubeTex, texCoordSlice2);
 
 
-        // if(applyTransferFunc){
-        //    colorSlice1.rgb = texture2D(transferTex, vec2(0.1+0.9*(colorSlice1.a - lowThreshold1)/(highThreshold1 - lowThreshold1), sqrt(intensity1))).rgb;
-        //    colorSlice2.rgb = texture2D(transferTex, vec2(0.1+0.9*(colorSlice2.a - lowThreshold1)/(highThreshold1 - lowThreshold1), sqrt(intensity2))).rgb;
-        //  }
-
-//
-//          if(applyTransferFunc){
-//             colorSlice1.rgb = texture2D(transferTex, vec2(colorSlice1.a, 1.0)).rgb;
-//             colorSlice2.rgb = texture2D(transferTex, vec2(colorSlice2.a, 1.0)).rgb;
-//           }
-//
-// if(transferChartShow){
-//   if(colorSlice1.a < lowThreshold1 || colorSlice1.a > highThreshold1){
-//     colorSlice1.a = 0.0;
-//   }else if(colorSlice1.a <   0.2){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)) )*alphaAdjustmentFactor1  ;
-//   }else if(colorSlice1.a <  0.4){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow2)*alphaAdjustmentFactor2;
-//   }else if(colorSlice1.a < 0.6){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow3)*alphaAdjustmentFactor3 ;
-//   }else if(colorSlice1.a < 0.8){
-//       colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow4)*alphaAdjustmentFactor4 ;
-//   }else{
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0))- testlow5)*alphaAdjustmentFactor5 ;
-//   }
-//
-//   if(colorSlice2.a< lowThreshold1 || colorSlice2.a > highThreshold1 ){
-//     colorSlice2.a = 0.0;
-//   }else if(colorSlice2.a <  0.2){
-//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
-//   }else if(colorSlice2.a <  0.4){
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow2)*alphaAdjustmentFactor2 ;
-//   }else if(colorSlice2.a <  0.6){
-//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0))- testlow3)*alphaAdjustmentFactor3 ;
-//   }else if(colorSlice2.a < 0.8){
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow4)*alphaAdjustmentFactor4 ;
-//   }else {
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0))- testlow5)*alphaAdjustmentFactor5 ;
-//   }
-// }else {
-//   if(colorSlice1.a < lowThreshold1 || colorSlice1.a > highThreshold1){
-//     colorSlice1.a = 0.0;
-//   }else if(colorSlice1.a <   rangeMin+range){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
-//   }else if(colorSlice1.a <  rangeMin+2.0*range){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor2 ;
-//   }else if(colorSlice1.a <  rangeMin+3.0*range){
-//     colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor3 ;
-//   }else if(colorSlice1.a < rangeMin+ 4.0*range){
-//       colorSlice1.a = (1.0 - pow((1.0 - colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor4 ;
-//   }else{
-//     colorSlice1.a = (1.0 - pow((1.0 -colorSlice1.a), (1.0/5.0)))*alphaAdjustmentFactor5 ;
-//   }
-//
-//   if(colorSlice2.a < lowThreshold1 || colorSlice2.a > highThreshold1 ){
-//     colorSlice2.a = 0.0;
-//   }else if(colorSlice2.a <  rangeMin+range){
-//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor1 ;
-//   }else if(colorSlice2.a <  rangeMin+2.0*range){
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor2 ;
-//   }else if(colorSlice2.a <  rangeMin+3.0*range){
-//     colorSlice2.a = (1.0 - pow((1.0 - colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor3 ;
-//   }else if(colorSlice2.a < rangeMin+ 4.0*range){
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a), (1.0/5.0)))*alphaAdjustmentFactor4 ;
-//   }else {
-//     colorSlice2.a = (1.0 - pow((1.0 -colorSlice2.a ), (1.0/5.0)))*alphaAdjustmentFactor5;
-//   }
-// }
-
+   
 
         float zDifference = mod(texCoord.z *255.0 ,1.0);
         return mix(colorSlice1, colorSlice2, zDifference);
