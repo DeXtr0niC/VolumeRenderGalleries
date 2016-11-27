@@ -22,7 +22,15 @@
     <script src="./libs/draggable-points.js" ></script>
     <script src="./libs/stats.min.js" ></script>
 
-  
+    <div id="intro">
+
+      <div id="instruction">
+      
+
+      </div>
+      <a href="#" id="introStart">START</a>
+    </div>
+    <div id="container" >
 
 <ul style="float: left; list-style-type: none; position: absolute">
 
@@ -252,8 +260,7 @@ precision highp sampler2D;
         colorSlice2 = texture2D(cubeTex, texCoordSlice2);
 
 
-   
-
+    
         float zDifference = mod(texCoord.z *255.0 ,1.0);
         return mix(colorSlice1, colorSlice2, zDifference);
 
