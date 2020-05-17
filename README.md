@@ -1,5 +1,7 @@
 # Volume Rendering using dynamic preview galleries in WebGL
 
+**Disclaimer: This was an experimental prove of concept program. The development focus was not on delivering clean code, but to get a working example application.**
+
 This was the project of my bachelor thesis (B.Sc. Computational Visualistics). 
 A set of 256 medical CT images is rendered to a 3D-Model using raycasting techniques.
 The projects is written using JavaScript and WebGL, especially the Three.js library. 
